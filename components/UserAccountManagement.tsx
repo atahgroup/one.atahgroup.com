@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 import toast from "react-hot-toast";
@@ -116,10 +116,15 @@ const DeleteUserAction = ({
 
 interface GrantUserButtonProps {
   user: ListedUser;
-  capabilities?: string[];
+  refreshCapabilities: () => void;
+  capabilities: string[];
 }
 
-const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
+const GrantUserActionInner = ({
+  user,
+  capabilities,
+  refreshCapabilities,
+}: GrantUserButtonProps) => {
   const grantableCapabilities: string[] =
     (typeof window !== "undefined" &&
       JSON.parse(localStorage.getItem("session_capabilities") || "[]")) ||
@@ -131,16 +136,7 @@ const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
     }
   `;
 
-  const GET_USER_CAPABILITIES = gql`
-    query GetUserCapabilities($userId: Int!) {
-      accountGetUserCapabilities(userId: $userId)
-    }
-  `;
-
   const [grantCapabilities] = useMutation(GRANT_CAPABILITIES);
-  const [getUserCapabilities, { data: existingData }] = useLazyQuery<{
-    accountGetUserCapabilities: string[];
-  }>(GET_USER_CAPABILITIES);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedCaps, setSelectedCaps] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -164,6 +160,7 @@ const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
       toast.success(`Granted ${selectedCaps.join(", ")} to ${user.email}`);
       setIsMenuOpen(false);
       setSelectedCaps([]);
+      refreshCapabilities();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       toast.error(`Grant failed: ${msg ?? "unknown"}`);
@@ -178,8 +175,7 @@ const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
         className="inline-flex whitespace-nowrap items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500 dark:focus:ring-green-400"
         onClick={() => {
           setIsMenuOpen(true);
-          // fetch the user's existing capabilities when opening the menu
-          getUserCapabilities({ variables: { userId: user.userId } });
+          refreshCapabilities();
         }}
       >
         Grant
@@ -200,9 +196,7 @@ const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
                 </p>
               ) : (
                 grantableCapabilities.map((cap) => {
-                  const already = (
-                    existingData?.accountGetUserCapabilities || []
-                  ).includes(cap);
+                  const already = capabilities.includes(cap);
                   return (
                     <div key={cap} className="py-1">
                       {already ? (
@@ -252,7 +246,11 @@ const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
   );
 };
 
-const GrantUserAction = ({ user }: GrantUserButtonProps) => {
+const GrantUserAction = ({
+  user,
+  capabilities,
+  refreshCapabilities,
+}: GrantUserButtonProps) => {
   if (!hasSessionCapability("AccountGrantCapability")) {
     return (
       <button
@@ -264,14 +262,26 @@ const GrantUserAction = ({ user }: GrantUserButtonProps) => {
     );
   }
 
-  return <GrantUserActionInner user={user} />;
+  return (
+    <GrantUserActionInner
+      user={user}
+      capabilities={capabilities}
+      refreshCapabilities={refreshCapabilities}
+    />
+  );
 };
 
 interface DepriveUserButtonProps {
   user: ListedUser;
+  refreshCapabilities: () => void;
+  capabilities: string[];
 }
 
-const DepriveUserActionInner = ({ user }: DepriveUserButtonProps) => {
+const DepriveUserActionInner = ({
+  user,
+  refreshCapabilities,
+  capabilities,
+}: DepriveUserButtonProps) => {
   const deprivableCapabilities: string[] =
     (typeof window !== "undefined" &&
       JSON.parse(localStorage.getItem("session_capabilities") || "[]")) ||
@@ -283,17 +293,7 @@ const DepriveUserActionInner = ({ user }: DepriveUserButtonProps) => {
     }
   `;
 
-  const GET_USER_CAPABILITIES = gql`
-    query GetUserCapabilities($userId: Int!) {
-      accountGetUserCapabilities(userId: $userId)
-    }
-  `;
-
   const [revokeCapabilities] = useMutation(REVOKE_CAPABILITIES);
-  const [getUserCapabilities, { data: existingData }] = useLazyQuery<{
-    accountGetUserCapabilities: string[];
-  }>(GET_USER_CAPABILITIES);
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedCaps, setSelectedCaps] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -331,7 +331,7 @@ const DepriveUserActionInner = ({ user }: DepriveUserButtonProps) => {
         className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-purple-500 dark:focus:ring-purple-400"
         onClick={() => {
           setIsMenuOpen(true);
-          getUserCapabilities({ variables: { userId: user.userId } });
+          refreshCapabilities();
         }}
       >
         Deprive
@@ -346,42 +346,30 @@ const DepriveUserActionInner = ({ user }: DepriveUserButtonProps) => {
             </p>
 
             <div className="mt-4 max-h-60 overflow-y-auto rounded p-2 bg-white dark:bg-background">
-              {(!existingData ||
-                existingData.accountGetUserCapabilities.length === 0) && (
+              {capabilities.length === 0 && (
                 <p className="text-sm text-foreground">
                   This user has no capabilities.
                 </p>
               )}
 
-              {existingData &&
-                (() => {
-                  const userCaps =
-                    existingData.accountGetUserCapabilities || [];
-                  const valid = userCaps.filter((c) =>
-                    deprivableCapabilities.includes(c)
-                  );
-                  if (valid.length === 0) {
-                    return (
-                      <p className="text-sm text-foreground">
-                        No deprivable capabilities in your session.
-                      </p>
-                    );
-                  }
-
-                  return valid.map((cap) => (
-                    <div key={cap} className="py-1">
-                      <label className="flex items-center gap-2 text-sm text-foreground">
-                        <input
-                          type="checkbox"
-                          checked={selectedCaps.includes(cap)}
-                          onChange={() => toggleCap(cap)}
-                          className="h-4 w-4 rounded"
-                        />
-                        <span>{cap}</span>
-                      </label>
-                    </div>
-                  ));
-                })()}
+              {(() => {
+                const valid = capabilities.filter((c) =>
+                  deprivableCapabilities.includes(c)
+                );
+                return valid.map((cap) => (
+                  <div key={cap} className="py-1">
+                    <label className="flex items-center gap-2 text-sm text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={selectedCaps.includes(cap)}
+                        onChange={() => toggleCap(cap)}
+                        className="h-4 w-4 rounded"
+                      />
+                      <span>{cap}</span>
+                    </label>
+                  </div>
+                ));
+              })()}
             </div>
 
             <div className="mt-4 flex justify-end gap-2">
@@ -410,7 +398,11 @@ const DepriveUserActionInner = ({ user }: DepriveUserButtonProps) => {
   );
 };
 
-const DepriveUserAction = ({ user }: DepriveUserButtonProps) => {
+const DepriveUserAction = ({
+  user,
+  refreshCapabilities,
+  capabilities,
+}: DepriveUserButtonProps) => {
   if (!hasSessionCapability("AccountRevokeCapability")) {
     return (
       <button
@@ -422,7 +414,13 @@ const DepriveUserAction = ({ user }: DepriveUserButtonProps) => {
     );
   }
 
-  return <DepriveUserActionInner user={user} />;
+  return (
+    <DepriveUserActionInner
+      user={user}
+      refreshCapabilities={refreshCapabilities}
+      capabilities={capabilities}
+    />
+  );
 };
 
 interface AccountTableRowProps {
@@ -437,6 +435,15 @@ const AccountTableRow = ({ user, refetch_users }: AccountTableRowProps) => {
     }
   `;
 
+  const [getUserCapabilities, { data: existingData, refetch }] = useLazyQuery<{
+    accountGetUserCapabilities: string[];
+  }>(GET_USER_CAPABILITIES);
+
+  const refreshCapabilities = () => {
+    getUserCapabilities({ variables: { userId: user.userId } });
+    refetch();
+  };
+
   return (
     <tr key={user.userId}>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
@@ -447,8 +454,16 @@ const AccountTableRow = ({ user, refetch_users }: AccountTableRowProps) => {
       </td>
       <td className="px-6 py-4 whitespace-nowrap space-x-2">
         <DeleteUserAction user={user} refetch_users={refetch_users} />
-        <GrantUserAction user={user} />
-        <DepriveUserAction user={user} />
+        <GrantUserAction
+          user={user}
+          capabilities={existingData?.accountGetUserCapabilities || []}
+          refreshCapabilities={refreshCapabilities}
+        />
+        <DepriveUserAction
+          user={user}
+          capabilities={existingData?.accountGetUserCapabilities || []}
+          refreshCapabilities={refreshCapabilities}
+        />
       </td>
     </tr>
   );
