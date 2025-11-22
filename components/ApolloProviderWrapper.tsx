@@ -12,7 +12,10 @@ export const ApolloProviderWrapper = ({
   children: React.ReactNode;
 }) => {
   const client = new ApolloClient({
-    link: new HttpLink({ uri: "https://api.atahgroup.com/graphql" }),
+    link: new HttpLink({
+      uri: "https://api.atahgroup.com/graphql",
+      credentials: "include",
+    }),
     cache: new InMemoryCache(),
   });
 
