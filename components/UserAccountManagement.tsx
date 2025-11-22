@@ -349,6 +349,8 @@ export const UserAccountManagementPanelInner = () => {
   if (error) return <p>Unable to load user information: {error.message}</p>;
 
   const users = (data as UserAccountsQueryResult).accountListAllUsers;
+  const sortedUsers = [...users];
+  sortedUsers.sort((a, b) => a.userId - b.userId);
 
   return (
     <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
@@ -357,7 +359,7 @@ export const UserAccountManagementPanelInner = () => {
         A list of all registered user accounts.
       </p>
 
-      <AccountTable users={users} refetch_users={refetch} />
+      <AccountTable users={sortedUsers} refetch_users={refetch} />
     </div>
   );
 };
