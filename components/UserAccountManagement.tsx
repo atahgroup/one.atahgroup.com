@@ -119,6 +119,26 @@ const GrantUserAction = ({ user }: GrantUserButtonProps) => {
   );
 };
 
+interface DepriveUserButtonProps {
+  user: ListedUser;
+}
+
+const DepriveUserAction = ({ user }: DepriveUserButtonProps) => {
+  const onDepriveClick = (u: ListedUser) => {
+    // TODO: Implement deprive logic here
+    toast.success(`Deprived permissions from ${u.email}`);
+  };
+
+  return (
+    <button
+      className="inline-flex whitespace-nowrap text-smitems-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-purple-500 dark:focus:ring-purple-400"
+      onClick={() => onDepriveClick(user)}
+    >
+      Deprive
+    </button>
+  );
+};
+
 interface UsersTableProps {
   users: ListedUser[];
   refetch_users: () => void;
@@ -160,6 +180,7 @@ const ManagementTable = ({ users, refetch_users }: UsersTableProps) => {
                 <td className="px-6 py-4 whitespace-nowrap space-x-2">
                   <DeleteUserAction user={u} refetch_users={refetch_users} />
                   <GrantUserAction user={u} />
+                  <DepriveUserAction user={u} />
                 </td>
               </tr>
             ))
