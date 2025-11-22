@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { gql } from "@apollo/client";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 import toast from "react-hot-toast";
 import { hasSessionCapability } from "./SessionCapabilityProvider";
 
@@ -130,7 +130,16 @@ const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
     }
   `;
 
+  const GET_USER_CAPABILITIES = gql`
+    query GetUserCapabilities($userId: Int!) {
+      accountGetUserCapabilities(userId: $userId)
+    }
+  `;
+
   const [grantCapabilities] = useMutation(GRANT_CAPABILITIES);
+  const [getUserCapabilities, { data: existingData }] = useLazyQuery<{
+    accountGetUserCapabilities: string[];
+  }>(GET_USER_CAPABILITIES);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedCaps, setSelectedCaps] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -166,7 +175,11 @@ const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
     <>
       <button
         className="inline-flex whitespace-nowrap items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500 dark:focus:ring-green-400"
-        onClick={() => setIsMenuOpen(true)}
+        onClick={() => {
+          setIsMenuOpen(true);
+          // fetch the user's existing capabilities when opening the menu
+          getUserCapabilities({ variables: { userId: user.userId } });
+        }}
       >
         Grant
       </button>
@@ -185,20 +198,30 @@ const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
                   No grantable capabilities in your session.
                 </p>
               ) : (
-                grantableCapabilities.map((cap) => (
-                  <label
-                    key={cap}
-                    className="flex items-center gap-2 py-1 text-sm text-foreground"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedCaps.includes(cap)}
-                      onChange={() => toggleCap(cap)}
-                      className="h-4 w-4 rounded"
-                    />
-                    <span>{cap}</span>
-                  </label>
-                ))
+                grantableCapabilities.map((cap) => {
+                  const already = (
+                    existingData?.accountGetUserCapabilities || []
+                  ).includes(cap);
+                  return (
+                    <div key={cap} className="py-1">
+                      {already ? (
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {cap} (already granted)
+                        </div>
+                      ) : (
+                        <label className="flex items-center gap-2 text-sm text-foreground">
+                          <input
+                            type="checkbox"
+                            checked={selectedCaps.includes(cap)}
+                            onChange={() => toggleCap(cap)}
+                            className="h-4 w-4 rounded"
+                          />
+                          <span>{cap}</span>
+                        </label>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
 
