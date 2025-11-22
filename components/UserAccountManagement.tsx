@@ -4,7 +4,10 @@ import React, { useState } from "react";
 import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 import toast from "react-hot-toast";
-import { hasSessionCapability } from "./SessionCapabilityProvider";
+import {
+  getSessionUserId,
+  hasSessionCapability,
+} from "./SessionCapabilityProvider";
 
 type ListedUser = {
   userId: number;
@@ -100,7 +103,10 @@ const DeleteUserAction = ({
   user,
   refetch_users: refetch,
 }: DeleteUserButtonProps) => {
-  if (!hasSessionCapability("AccountDeleteUser")) {
+  if (
+    !hasSessionCapability("AccountDeleteUser") ||
+    getSessionUserId() === String(user.userId)
+  ) {
     return (
       <button
         className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed"
@@ -127,7 +133,7 @@ const GrantUserActionInner = ({
 }: GrantUserButtonProps) => {
   const grantableCapabilities: string[] =
     (typeof window !== "undefined" &&
-      JSON.parse(localStorage.getItem("session_capabilities") || "[]")) ||
+      JSON.parse(sessionStorage.getItem("session_capabilities") || "[]")) ||
     [];
 
   const GRANT_CAPABILITIES = gql`
@@ -251,7 +257,10 @@ const GrantUserAction = ({
   capabilities,
   refreshCapabilities,
 }: GrantUserButtonProps) => {
-  if (!hasSessionCapability("AccountGrantCapability")) {
+  if (
+    !hasSessionCapability("AccountGrantCapability") ||
+    getSessionUserId() === String(user.userId)
+  ) {
     return (
       <button
         className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed"
@@ -284,7 +293,7 @@ const RevokeUserActionInner = ({
 }: RevokeUserButtonProps) => {
   const deprivableCapabilities: string[] =
     (typeof window !== "undefined" &&
-      JSON.parse(localStorage.getItem("session_capabilities") || "[]")) ||
+      JSON.parse(sessionStorage.getItem("session_capabilities") || "[]")) ||
     [];
 
   const REVOKE_CAPABILITIES = gql`
@@ -403,7 +412,10 @@ const RevokeUserAction = ({
   refreshCapabilities,
   capabilities,
 }: RevokeUserButtonProps) => {
-  if (!hasSessionCapability("AccountRevokeCapability")) {
+  if (
+    !hasSessionCapability("AccountRevokeCapability") ||
+    getSessionUserId() === String(user.userId)
+  ) {
     return (
       <button
         className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed"
