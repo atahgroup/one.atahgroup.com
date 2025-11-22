@@ -7,6 +7,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
+import { ApolloProviderWrapper } from "@/components/ApolloProviderWrapper";
+import { SessionCapabilityProvider } from "@/components/SessionCapabilityProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,10 +35,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NavBar />
-        {children}
-        <Toaster position="bottom-center" reverseOrder={false} />
-        <Footer />
+        <ApolloProviderWrapper>
+          <SessionCapabilityProvider>
+            <NavBar />
+            {children}
+            <Toaster position="bottom-center" reverseOrder={false} />
+            <Footer />
+          </SessionCapabilityProvider>
+        </ApolloProviderWrapper>
       </body>
     </html>
   );

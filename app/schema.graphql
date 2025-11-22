@@ -1,0 +1,43 @@
+type ListedUser {
+  user_id: Int!
+  email: String!
+}
+
+type NewUserAccount {
+  user_id: Int!
+  email: String!
+  capabilities: [String!]!
+}
+
+type CurrentSessionInfo {
+  user_id: Int!
+  capabilities: [String!]!
+}
+
+type Query {
+  # USER ACCOUNT MANAGEMENT
+  ####################################################################
+  account_list_all_users: [ListedUser!]!
+  account_get_user_capabilities(user_id: Int!): [String!]!
+  account_session_info: CurrentSessionInfo!
+
+  # SERVICE MANAGEMENT
+  ####################################################################
+}
+
+type Mutation {
+  # USER ACCOUNT MANAGEMENT
+  ####################################################################
+  account_grant_capability(user_id: Int!, capabilities: [String!]!): Boolean!
+  account_revoke_capability(user_id: Int!, capabilities: [String!]!): Boolean!
+  account_create_user(email: String!): NewUserAccount!
+  account_delete_user(user_id: Int!): Boolean!
+
+  # SERVICE MANAGEMENT
+  ####################################################################
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
