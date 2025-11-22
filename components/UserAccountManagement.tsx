@@ -66,7 +66,7 @@ const DeleteUserActionInner = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
           <div className="bg-background border border-foreground/40 rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 className="text-lg font-semibold">Confirm delete</h2>
-            <p className="mt-2 text-sm text-foreground">
+            <p className="mt-2 text-sm text-foreground text-wrap">
               Are you sure you want to delete{" "}
               <strong>{selectedUser.email}</strong>?
             </p>
@@ -185,7 +185,7 @@ const GrantUserActionInner = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
           <div className="bg-background border border-foreground/40 rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 className="text-lg font-semibold">Grant capabilities</h2>
-            <p className="mt-2 text-sm text-foreground">
+            <p className="mt-2 text-sm text-foreground text-wrap">
               Grant capabilities to <strong>{user.email}</strong>
             </p>
 
@@ -341,7 +341,7 @@ const RevokeUserActionInner = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
           <div className="bg-background border border-foreground/40 rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 className="text-lg font-semibold">Revoke capabilities</h2>
-            <p className="mt-2 text-sm text-foreground">
+            <p className="mt-2 text-sm text-foreground text-wrap">
               Revoke capabilities from <strong>{user.email}</strong>
             </p>
 
@@ -542,7 +542,7 @@ type CreateUserAccountResult = {
   };
 };
 
-const CreateUserAccountInner = ({ refetch_users }: CreateUserAccountProps) => {
+const CreateUserAccount = ({ refetch_users }: CreateUserAccountProps) => {
   const CREATE_USER = gql`
     mutation CreateUser($email: String!) {
       accountCreateUser(email: $email) {
@@ -612,14 +612,6 @@ const CreateUserAccountInner = ({ refetch_users }: CreateUserAccountProps) => {
   );
 };
 
-const CreateUserAccount = ({ refetch_users }: CreateUserAccountProps) => {
-  if (!hasSessionCapability("AccountCreateUser")) {
-    return <></>;
-  }
-
-  return <CreateUserAccountInner refetch_users={refetch_users} />;
-};
-
 export const UserAccountManagementPanelInner = () => {
   const LIST_ALL_USERS = gql`
     query {
@@ -642,7 +634,9 @@ export const UserAccountManagementPanelInner = () => {
     <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
       <h1 className="text-2xl font-semibold">User Accounts</h1>
       <AccountTable users={sortedUsers} refetch_users={refetch} />
-      <CreateUserAccount refetch_users={refetch} />
+      {hasSessionCapability("AccountCreateUser") && (
+        <CreateUserAccount refetch_users={refetch} />
+      )}
     </div>
   );
 };
