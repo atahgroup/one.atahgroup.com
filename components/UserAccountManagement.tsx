@@ -18,7 +18,7 @@ interface DeleteUserButtonProps {
 
 const DeleteUserActionInner = ({
   user,
-  refetch_users: refetch,
+  refetch_users,
 }: DeleteUserButtonProps) => {
   const DELETE_USER = gql`
     mutation DeleteUser($userId: Int!) {
@@ -39,7 +39,7 @@ const DeleteUserActionInner = ({
       toast.success(`Deleted ${selectedUser.email}`);
       setIsModalOpen(false);
       setSelectedUser(null);
-      await refetch();
+      await refetch_users();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       toast.error(`Delete failed: ${msg ?? "unknown"}`);
@@ -116,6 +116,7 @@ const DeleteUserAction = ({
 
 interface GrantUserButtonProps {
   user: ListedUser;
+  capabilities?: string[];
 }
 
 const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
@@ -271,18 +272,141 @@ interface DepriveUserButtonProps {
 }
 
 const DepriveUserActionInner = ({ user }: DepriveUserButtonProps) => {
-  const onDepriveClick = (u: ListedUser) => {
-    // TODO: Implement deprive logic here
-    toast.success(`Deprived permissions from ${u.email}`);
+  const deprivableCapabilities: string[] =
+    (typeof window !== "undefined" &&
+      JSON.parse(localStorage.getItem("session_capabilities") || "[]")) ||
+    [];
+
+  const REVOKE_CAPABILITIES = gql`
+    mutation RevokeCapability($userId: Int!, $capabilities: [String!]!) {
+      accountRevokeCapability(userId: $userId, capabilities: $capabilities)
+    }
+  `;
+
+  const GET_USER_CAPABILITIES = gql`
+    query GetUserCapabilities($userId: Int!) {
+      accountGetUserCapabilities(userId: $userId)
+    }
+  `;
+
+  const [revokeCapabilities] = useMutation(REVOKE_CAPABILITIES);
+  const [getUserCapabilities, { data: existingData }] = useLazyQuery<{
+    accountGetUserCapabilities: string[];
+  }>(GET_USER_CAPABILITIES);
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [selectedCaps, setSelectedCaps] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const toggleCap = (cap: string) => {
+    setSelectedCaps((prev) =>
+      prev.includes(cap) ? prev.filter((c) => c !== cap) : [...prev, cap]
+    );
+  };
+
+  const onConfirmRevoke = async () => {
+    if (selectedCaps.length === 0) {
+      toast.error("Please select at least one capability to deprive.");
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      await revokeCapabilities({
+        variables: { userId: user.userId, capabilities: selectedCaps },
+      });
+      toast.success(`Revoked ${selectedCaps.join(", ")} from ${user.email}`);
+      setIsMenuOpen(false);
+      setSelectedCaps([]);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(`Revoke failed: ${msg ?? "unknown"}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
-    <button
-      className="inline-flex whitespace-nowrap text-smitems-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-purple-500 dark:focus:ring-purple-400"
-      onClick={() => onDepriveClick(user)}
-    >
-      Deprive
-    </button>
+    <>
+      <button
+        className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-purple-500 dark:focus:ring-purple-400"
+        onClick={() => {
+          setIsMenuOpen(true);
+          getUserCapabilities({ variables: { userId: user.userId } });
+        }}
+      >
+        Deprive
+      </button>
+
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
+          <div className="bg-background border border-foreground/40 rounded-lg shadow-xl max-w-md w-full p-6">
+            <h2 className="text-lg font-semibold">Deprive capabilities</h2>
+            <p className="mt-2 text-sm text-foreground">
+              Deprive capabilities from <strong>{user.email}</strong>
+            </p>
+
+            <div className="mt-4 max-h-60 overflow-y-auto rounded p-2 bg-white dark:bg-background">
+              {(!existingData ||
+                existingData.accountGetUserCapabilities.length === 0) && (
+                <p className="text-sm text-foreground">
+                  This user has no capabilities.
+                </p>
+              )}
+
+              {existingData &&
+                (() => {
+                  const userCaps =
+                    existingData.accountGetUserCapabilities || [];
+                  const valid = userCaps.filter((c) =>
+                    deprivableCapabilities.includes(c)
+                  );
+                  if (valid.length === 0) {
+                    return (
+                      <p className="text-sm text-foreground">
+                        No deprivable capabilities in your session.
+                      </p>
+                    );
+                  }
+
+                  return valid.map((cap) => (
+                    <div key={cap} className="py-1">
+                      <label className="flex items-center gap-2 text-sm text-foreground">
+                        <input
+                          type="checkbox"
+                          checked={selectedCaps.includes(cap)}
+                          onChange={() => toggleCap(cap)}
+                          className="h-4 w-4 rounded"
+                        />
+                        <span>{cap}</span>
+                      </label>
+                    </div>
+                  ));
+                })()}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="px-4 py-2 bg-gray-100 text-black rounded-md hover:bg-gray-200"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setSelectedCaps([]);
+                }}
+                disabled={isProcessing}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                onClick={onConfirmRevoke}
+                disabled={isProcessing}
+              >
+                {isProcessing ? "Revoking..." : "Confirm Deprive"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
@@ -299,6 +423,35 @@ const DepriveUserAction = ({ user }: DepriveUserButtonProps) => {
   }
 
   return <DepriveUserActionInner user={user} />;
+};
+
+interface AccountTableRowProps {
+  user: ListedUser;
+  refetch_users: () => void;
+}
+
+const AccountTableRow = ({ user, refetch_users }: AccountTableRowProps) => {
+  const GET_USER_CAPABILITIES = gql`
+    query GetUserCapabilities($userId: Int!) {
+      accountGetUserCapabilities(userId: $userId)
+    }
+  `;
+
+  return (
+    <tr key={user.userId}>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+        {user.userId}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+        {user.email}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap space-x-2">
+        <DeleteUserAction user={user} refetch_users={refetch_users} />
+        <GrantUserAction user={user} />
+        <DepriveUserAction user={user} />
+      </td>
+    </tr>
+  );
 };
 
 type UserAccountsQueryResult = {
@@ -335,20 +488,12 @@ const AccountTable = ({ users, refetch_users }: AccountTableProps) => {
               </td>
             </tr>
           ) : (
-            users.map((u) => (
-              <tr key={u.userId}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                  {u.userId}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                  {u.email}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap space-x-2">
-                  <DeleteUserAction user={u} refetch_users={refetch_users} />
-                  <GrantUserAction user={u} />
-                  <DepriveUserAction user={u} />
-                </td>
-              </tr>
+            users.map((user) => (
+              <AccountTableRow
+                key={user.userId}
+                user={user}
+                refetch_users={refetch_users}
+              />
             ))
           )}
         </tbody>
