@@ -181,6 +181,11 @@ export const NavBar = () => {
             <NavBarItem label="Health" href="/health" onClick={close} />
             <NavBarItem label="Education" href="/education" onClick={close} />
             <NavBarItem label="Account" href="/account" onClick={close} />
+            <NavBarItem
+              label="Logout"
+              onClick={() => endSession()}
+              href="https://www.atahgroup.com/"
+            />
           </div>
         </div>
       </div>
