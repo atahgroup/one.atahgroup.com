@@ -2,7 +2,7 @@
 
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-import React from "react";
+import React, { useEffect } from "react";
 
 type SessionInfoQueryResult = {
   accountSessionInfo: {
@@ -24,8 +24,15 @@ export const SessionCapabilityProvider = ({
   `;
 
   const { loading, error, data } = useQuery(ACCOUNT_SESSION_INFO);
+
+  useEffect(() => {
+    if (error) {
+      window.location.href = "https://www.atahgroup.com";
+    }
+  }, [error]);
+
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Unable to load session information: {error.message}</p>;
+  if (!data) return <p>Redirecting...</p>;
 
   const session_info = data as SessionInfoQueryResult;
   const capabilities: string[] = session_info.accountSessionInfo.capabilities;
