@@ -1,6 +1,6 @@
 "use client";
 
-import { UserAccountManagementTable } from "@/components/UserAccountManagementTable";
+import { UserAccountManagementTable } from "@/components/UserAccountManagement";
 
 export default function Citizen() {
   return (
