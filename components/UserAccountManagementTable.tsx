@@ -55,7 +55,7 @@ const UsersTable = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <button
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 dark:focus:ring-red-400"
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 dark:focus:ring-red-400"
                     onClick={() => onDelete(u)}
                   >
                     Delete
@@ -124,7 +124,7 @@ export const UserAccountManagementTableInner = () => {
     <>
       <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
         <h1 className="text-2xl font-semibold">User Accounts</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-foreground">
           A list of all registered user accounts.
         </p>
 
@@ -135,13 +135,13 @@ export const UserAccountManagementTableInner = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
           <div className="bg-background border border-foreground/40 rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 className="text-lg font-semibold">Confirm delete</h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-foreground">
               Are you sure you want to delete{" "}
               <strong>{selectedUser.email}</strong>?
             </p>
             <div className="mt-4 flex justify-end gap-2">
               <button
-                className="px-4 py-2 bg-gray-100 text-black rounded-md"
+                className="px-4 py-2 text-background rounded-md bg-foreground/50 hover:bg-foreground/60"
                 onClick={() => {
                   setIsModalOpen(false);
                   setSelectedUser(null);
@@ -151,7 +151,7 @@ export const UserAccountManagementTableInner = () => {
                 Cancel
               </button>
               <button
-                className="px-4 py-2 bg-red-600 text-white rounded-md"
+                className="px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-800"
                 onClick={confirmDelete}
                 disabled={isDeleting}
               >
@@ -181,7 +181,7 @@ export const UserAccountManagementTable = () => {
     return (
       <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
         <h1 className="text-2xl font-semibold">Account Management</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-foreground">
           Your session does not have the capability to view user accounts.
         </p>
       </div>
