@@ -14,94 +14,25 @@ type UserAccountsQueryResult = {
   accountListAllUsers: ListedUser[];
 };
 
-const UsersTable = ({
-  users,
-  onDelete,
-}: {
-  users: ListedUser[];
-  onDelete: (u: ListedUser) => void;
-}) => {
-  return (
-    <div className="mt-6 overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-background">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
-              User ID
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
-              Email
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-background divide-y divide-gray-200">
-          {users.length === 0 ? (
-            <tr>
-              <td colSpan={3} className="px-6 py-4 text-sm text-foreground">
-                No users found.
-              </td>
-            </tr>
-          ) : (
-            users.map((u) => (
-              <tr key={u.userId}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                  {u.userId}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                  {u.email}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <button
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 dark:focus:ring-red-400"
-                    onClick={() => onDelete(u)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+interface DeleteUserButtonProps {
+  refetch_users: () => void;
+  user: ListedUser;
+}
 
-export const UserAccountManagementTableInner = () => {
-  const LIST_ALL_USERS = gql`
-    query {
-      accountListAllUsers {
-        userId
-        email
-      }
-    }
-  `;
-
+const DeleteUserAction = ({
+  user,
+  refetch_users: refetch,
+}: DeleteUserButtonProps) => {
   const DELETE_USER = gql`
     mutation DeleteUser($userId: Int!) {
       accountDeleteUser(userId: $userId)
     }
   `;
 
-  const { loading, error, data, refetch } = useQuery(LIST_ALL_USERS);
   const [deleteUser] = useMutation(DELETE_USER);
-
   const [selectedUser, setSelectedUser] = useState<ListedUser | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Unable to load user information: {error.message}</p>;
-
-  const users = (data as UserAccountsQueryResult).accountListAllUsers;
-
-  const onDeleteClick = (u: ListedUser) => {
-    setSelectedUser(u);
-    setIsModalOpen(true);
-  };
 
   const confirmDelete = async () => {
     if (!selectedUser) return;
@@ -120,16 +51,19 @@ export const UserAccountManagementTableInner = () => {
     }
   };
 
+  const onDeleteClick = (u: ListedUser) => {
+    setSelectedUser(u);
+    setIsModalOpen(true);
+  };
+
   return (
     <>
-      <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
-        <h1 className="text-2xl font-semibold">User Accounts</h1>
-        <p className="mt-2 text-sm text-foreground">
-          A list of all registered user accounts.
-        </p>
-
-        <UsersTable users={users} onDelete={onDeleteClick} />
-      </div>
+      <button
+        className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 dark:focus:ring-red-400"
+        onClick={() => onDeleteClick(user)}
+      >
+        Delete
+      </button>
 
       {isModalOpen && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
@@ -165,6 +99,105 @@ export const UserAccountManagementTableInner = () => {
   );
 };
 
+interface GrantUserButtonProps {
+  user: ListedUser;
+}
+
+const GrantUserAction = ({ user }: GrantUserButtonProps) => {
+  const onGrantClick = (u: ListedUser) => {
+    // TODO: Implement grant logic here
+    toast.success(`Granted permissions to ${u.email}`);
+  };
+
+  return (
+    <button
+      className="inline-flex whitespace-nowrap text-smitems-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500 dark:focus:ring-green-400"
+      onClick={() => onGrantClick(user)}
+    >
+      Grant
+    </button>
+  );
+};
+
+interface UsersTableProps {
+  users: ListedUser[];
+  refetch_users: () => void;
+}
+
+const ManagementTable = ({ users, refetch_users }: UsersTableProps) => {
+  return (
+    <div className="mt-6 overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead className="bg-background">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
+              User ID
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
+              Email
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-foreground uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-background divide-y divide-gray-200">
+          {users.length === 0 ? (
+            <tr>
+              <td colSpan={3} className="px-6 py-4 text-sm text-foreground">
+                No users found.
+              </td>
+            </tr>
+          ) : (
+            users.map((u) => (
+              <tr key={u.userId}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                  {u.userId}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                  {u.email}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap space-x-2">
+                  <DeleteUserAction user={u} refetch_users={refetch_users} />
+                  <GrantUserAction user={u} />
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export const UserAccountManagementTablePanel = () => {
+  const LIST_ALL_USERS = gql`
+    query {
+      accountListAllUsers {
+        userId
+        email
+      }
+    }
+  `;
+
+  const { loading, error, data, refetch } = useQuery(LIST_ALL_USERS);
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Unable to load user information: {error.message}</p>;
+
+  const users = (data as UserAccountsQueryResult).accountListAllUsers;
+
+  return (
+    <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
+      <h1 className="text-2xl font-semibold">User Accounts</h1>
+      <p className="mt-2 text-sm text-foreground">
+        A list of all registered user accounts.
+      </p>
+
+      <ManagementTable users={users} refetch_users={refetch} />
+    </div>
+  );
+};
+
 function isAuthorizedToSeeUsers() {
   const capabilities = localStorage.getItem("session_capabilities");
   if (!capabilities) return false;
@@ -188,5 +221,5 @@ export const UserAccountManagementTable = () => {
     );
   }
 
-  return <UserAccountManagementTableInner />;
+  return <UserAccountManagementTablePanel />;
 };
