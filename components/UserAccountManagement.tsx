@@ -480,7 +480,7 @@ interface AccountTableProps {
 
 const AccountTable = ({ users, refetch_users }: AccountTableProps) => {
   return (
-    <div className="mt-6 overflow-x-auto">
+    <div className="mt-6 overflow-x-auto overflow-y-auto max-h-96">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className="bg-background">
           <tr>
@@ -517,6 +517,94 @@ const AccountTable = ({ users, refetch_users }: AccountTableProps) => {
   );
 };
 
+interface CreateUserAccountProps {
+  refetch_users: () => void;
+}
+
+type CreateUserAccountResult = {
+  accountCreateUser: {
+    userId: number;
+    email: string;
+  };
+};
+
+const CreateUserAccount = ({ refetch_users }: CreateUserAccountProps) => {
+  const CREATE_USER = gql`
+    mutation CreateUser($email: String!) {
+      accountCreateUser(email: $email) {
+        userId
+        email
+      }
+    }
+  `;
+
+  const [createUser] = useMutation<CreateUserAccountResult, { email: string }>(
+    CREATE_USER
+  );
+  const [email, setEmail] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+
+  const validateEmail = (e: string) => {
+    return e.length > 3 && e.includes("@");
+  };
+
+  const onCreate = async () => {
+    if (!validateEmail(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    setIsCreating(true);
+    try {
+      const res = await createUser({ variables: { email } });
+      const created = res?.data?.accountCreateUser;
+      if (created) {
+        toast.success(`Created user ${created.email} (ID ${created.userId})`);
+        setEmail("");
+        await refetch_users();
+      } else {
+        toast.error("Create user failed: no data returned");
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(`Create user failed: ${msg ?? "unknown"}`);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  if (!hasSessionCapability("AccountCreateUser")) {
+    return (
+      <div className="mt-4">
+        <button
+          className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed"
+          disabled
+        >
+          Create User
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 flex items-center gap-2">
+      <input
+        type="email"
+        placeholder="user@example.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="px-3 py-2 border rounded-md bg-white dark:bg-background text-foreground"
+      />
+      <button
+        className="inline-flex whitespace-nowrap text-sm items-center px-4 py-3 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+        onClick={onCreate}
+        disabled={isCreating}
+      >
+        {isCreating ? "Creating..." : "Create User"}
+      </button>
+    </div>
+  );
+};
+
 export const UserAccountManagementPanelInner = () => {
   const LIST_ALL_USERS = gql`
     query {
@@ -541,8 +629,12 @@ export const UserAccountManagementPanelInner = () => {
       <p className="mt-2 text-sm text-foreground">
         A list of all registered user accounts.
       </p>
-
       <AccountTable users={sortedUsers} refetch_users={refetch} />
+
+      <p className="mt-6 text-sm text-foreground">
+        Create a new user account by entering their email address below.
+      </p>
+      <CreateUserAccount refetch_users={refetch} />
     </div>
   );
 };
