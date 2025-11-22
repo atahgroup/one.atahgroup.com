@@ -33,6 +33,7 @@ type Mutation {
   accountRevokeCapability(userId: Int!, capabilities: [String!]!): Boolean!
   accountCreateUser(email: String!): NewUserAccount!
   accountDeleteUser(userId: Int!): Boolean!
+  endSession: Boolean!
 
   # SERVICE MANAGEMENT
   ####################################################################
