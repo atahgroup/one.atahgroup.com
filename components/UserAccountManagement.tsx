@@ -4,14 +4,11 @@ import { useState } from "react";
 import { gql } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 import toast from "react-hot-toast";
+import { hasSessionCapability } from "./SessionCapabilityProvider";
 
 type ListedUser = {
   userId: number;
   email: string;
-};
-
-type UserAccountsQueryResult = {
-  accountListAllUsers: ListedUser[];
 };
 
 interface DeleteUserButtonProps {
@@ -19,7 +16,7 @@ interface DeleteUserButtonProps {
   user: ListedUser;
 }
 
-const DeleteUserAction = ({
+const DeleteUserActionInner = ({
   user,
   refetch_users: refetch,
 }: DeleteUserButtonProps) => {
@@ -99,11 +96,29 @@ const DeleteUserAction = ({
   );
 };
 
+const DeleteUserAction = ({
+  user,
+  refetch_users: refetch,
+}: DeleteUserButtonProps) => {
+  if (!hasSessionCapability("AccountDeleteUser")) {
+    return (
+      <button
+        className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed"
+        disabled
+      >
+        Delete
+      </button>
+    );
+  }
+
+  return <DeleteUserActionInner user={user} refetch_users={refetch} />;
+};
+
 interface GrantUserButtonProps {
   user: ListedUser;
 }
 
-const GrantUserAction = ({ user }: GrantUserButtonProps) => {
+const GrantUserActionInner = ({ user }: GrantUserButtonProps) => {
   const grantableCapabilities: string[] =
     (typeof window !== "undefined" &&
       JSON.parse(localStorage.getItem("session_capabilities") || "[]")) ||
@@ -213,11 +228,26 @@ const GrantUserAction = ({ user }: GrantUserButtonProps) => {
   );
 };
 
+const GrantUserAction = ({ user }: GrantUserButtonProps) => {
+  if (!hasSessionCapability("AccountGrantCapability")) {
+    return (
+      <button
+        className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed"
+        disabled
+      >
+        Grant
+      </button>
+    );
+  }
+
+  return <GrantUserActionInner user={user} />;
+};
+
 interface DepriveUserButtonProps {
   user: ListedUser;
 }
 
-const DepriveUserAction = ({ user }: DepriveUserButtonProps) => {
+const DepriveUserActionInner = ({ user }: DepriveUserButtonProps) => {
   const onDepriveClick = (u: ListedUser) => {
     // TODO: Implement deprive logic here
     toast.success(`Deprived permissions from ${u.email}`);
@@ -233,12 +263,31 @@ const DepriveUserAction = ({ user }: DepriveUserButtonProps) => {
   );
 };
 
-interface UsersTableProps {
+const DepriveUserAction = ({ user }: DepriveUserButtonProps) => {
+  if (!hasSessionCapability("AccountRevokeCapability")) {
+    return (
+      <button
+        className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed"
+        disabled
+      >
+        Deprive
+      </button>
+    );
+  }
+
+  return <DepriveUserActionInner user={user} />;
+};
+
+type UserAccountsQueryResult = {
+  accountListAllUsers: ListedUser[];
+};
+
+interface AccountTableProps {
   users: ListedUser[];
   refetch_users: () => void;
 }
 
-const ManagementTable = ({ users, refetch_users }: UsersTableProps) => {
+const AccountTable = ({ users, refetch_users }: AccountTableProps) => {
   return (
     <div className="mt-6 overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -285,7 +334,7 @@ const ManagementTable = ({ users, refetch_users }: UsersTableProps) => {
   );
 };
 
-export const UserAccountManagementTablePanel = () => {
+export const UserAccountManagementPanelInner = () => {
   const LIST_ALL_USERS = gql`
     query {
       accountListAllUsers {
@@ -308,24 +357,13 @@ export const UserAccountManagementTablePanel = () => {
         A list of all registered user accounts.
       </p>
 
-      <ManagementTable users={users} refetch_users={refetch} />
+      <AccountTable users={users} refetch_users={refetch} />
     </div>
   );
 };
 
-function isAuthorizedToSeeUsers() {
-  const capabilities = localStorage.getItem("session_capabilities");
-  if (!capabilities) return false;
-  try {
-    const capsArray = JSON.parse(capabilities);
-    return capsArray.includes("AccountListUsers");
-  } catch {
-    return false;
-  }
-}
-
-export const UserAccountManagementTable = () => {
-  if (!isAuthorizedToSeeUsers()) {
+export const UserAccountManagementPanel = () => {
+  if (!hasSessionCapability("AccountListUsers")) {
     return (
       <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
         <h1 className="text-2xl font-semibold">Account Management</h1>
@@ -336,5 +374,5 @@ export const UserAccountManagementTable = () => {
     );
   }
 
-  return <UserAccountManagementTablePanel />;
+  return <UserAccountManagementPanelInner />;
 };
