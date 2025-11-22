@@ -4,6 +4,12 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import React from "react";
 
+type SessionInfoQueryResult = {
+  accountSessionInfo: {
+    capabilities: string[];
+  };
+};
+
 export const SessionCapabilityProvider = ({
   children,
 }: {
@@ -21,7 +27,9 @@ export const SessionCapabilityProvider = ({
   if (loading) return <p>Loading session information...</p>;
   if (error) return <p>Unable to load session information: {error.message}</p>;
 
-  console.log(data);
+  const session_info = data as SessionInfoQueryResult;
+  const capabilities: string[] = session_info.accountSessionInfo.capabilities;
+  localStorage.setItem("session_capabilities", JSON.stringify(capabilities));
 
   return <>{children}</>;
 };
