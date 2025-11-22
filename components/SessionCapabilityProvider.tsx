@@ -24,7 +24,7 @@ export const SessionCapabilityProvider = ({
   `;
 
   const { loading, error, data } = useQuery(ACCOUNT_SESSION_INFO);
-  if (loading) return <p>Loading session information...</p>;
+  if (loading) return <p>Loading...</p>;
   if (error) return <p>Unable to load session information: {error.message}</p>;
 
   const session_info = data as SessionInfoQueryResult;
