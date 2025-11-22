@@ -20,6 +20,7 @@ type Query {
   accountListAllUsers: [ListedUser!]!
   accountGetUserCapabilities(userId: Int!): [String!]!
   accountSessionInfo: CurrentSessionInfo!
+  listAllCapabilities: [String!]!
 
   # SERVICE MANAGEMENT
   ####################################################################
