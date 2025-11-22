@@ -28,11 +28,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-    console.error("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set.");
-    return <div>Google Login not environment variable was not configured.</div>;
-  }
-
   return (
     <html lang="en">
       <body

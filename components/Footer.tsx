@@ -52,19 +52,19 @@ export const Footer = () => {
               </h4>
               <nav className="mt-2 flex flex-col text-sm text-foreground/90 items-center md:items-start">
                 <Link
-                  href="/about"
+                  href="https://www.atahgroup.com/about"
                   className="py-1 hover:underline text-center md:text-left"
                 >
                   About
                 </Link>
                 <Link
-                  href="/services"
+                  href="https://www.atahgroup.com/services"
                   className="py-1 hover:underline text-center md:text-left"
                 >
                   Services
                 </Link>
                 <Link
-                  href="/research"
+                  href="https://www.atahgroup.com/research"
                   className="py-1 hover:underline text-center md:text-left"
                 >
                   Research
@@ -78,19 +78,19 @@ export const Footer = () => {
               </h4>
               <nav className="mt-2 flex flex-col text-sm text-foreground/90 items-center md:items-start">
                 <Link
-                  href="/legal/terms"
+                  href="https://www.atahgroup.com/legal/terms"
                   className="py-1 hover:underline text-center md:text-left whitespace-nowrap"
                 >
                   Terms of Service
                 </Link>
                 <Link
-                  href="/legal/privacy"
+                  href="https://www.atahgroup.com/legal/privacy"
                   className="py-1 hover:underline text-center md:text-left"
                 >
                   Privacy Policy
                 </Link>
                 <Link
-                  href="/legal/cookie"
+                  href="https://www.atahgroup.com/legal/cookie"
                   className="py-1 hover:underline text-center md:text-left"
                 >
                   Cookie Policy
@@ -113,13 +113,22 @@ export const Footer = () => {
             © {new Date().getFullYear()} Atah Group — All rights reserved.
           </div>
           <div className="flex gap-4">
-            <Link href="/legal/terms" className="hover:underline">
+            <Link
+              href="https://www.atahgroup.com/legal/terms"
+              className="hover:underline"
+            >
               Terms
             </Link>
-            <Link href="/legal/privacy" className="hover:underline">
+            <Link
+              href="https://www.atahgroup.com/legal/privacy"
+              className="hover:underline"
+            >
               Privacy
             </Link>
-            <Link href="/contact" className="hover:underline">
+            <Link
+              href="https://www.atahgroup.com/contact"
+              className="hover:underline"
+            >
               Contact
             </Link>
           </div>

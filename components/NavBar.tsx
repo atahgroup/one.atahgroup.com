@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FiMenu, FiX, FiSun, FiMoon } from "react-icons/fi";
-import { LoginButton } from "./LoginButton";
 
 const NavBarItem = (props: {
   label: string;
@@ -68,105 +67,120 @@ export const NavBar = () => {
   };
 
   return (
-    <header className="flex flex-row justify-between w-full border-b border-foreground/30 bg-background">
-      <div className="w-full">
-        <div className="max-w-4xl mx-auto flex items-center justify-between px-4 py-2">
-          <div className="flex items-center select-none space-x-2">
-            <Image
-              src="/assets/logo.png"
-              alt="Atah Group Logo"
-              width={40}
-              height={40}
-            />
-            <span className="font-bold text-xl md:text-2xl text-foreground whitespace-nowrap">
-              Atah
-            </span>
-          </div>
+    <header className="w-full border-b border-foreground/30 bg-background">
+      <div className="w-full mx-auto flex px-4 py-2">
+        <div className="w-full flex items-center select-none space-x-2 mr-8">
+          <Image
+            src="/assets/logo.png"
+            alt="Atah Group Logo"
+            width={40}
+            height={40}
+          />
+          <span className="font-bold text-2xl text-foreground whitespace-nowrap">
+            Atah
+          </span>
+        </div>
 
-          {/* Desktop nav */}
-          <nav className="hidden lg:flex lg:items-center lg:space-x-3">
-            <NavBarItem label="Home" href="/" />
-            <NavBarItem label="Services" href="/services" />
-            <NavBarItem label="About" href="/about" />
-            <NavBarItem label="Contact Us" href="/contact" />
-          </nav>
+        {/* Desktop nav */}
+        <nav className="hidden md:flex md:items-center md:space-x-3">
+          <NavBarItem label="Home" href="/" />
+          <NavBarItem
+            label="Services"
+            href="https://www.atahgroup.com/services"
+          />
+          <NavBarItem label="About" href="https://www.atahgroup.com/about" />
+          <NavBarItem
+            label="Contact Us"
+            href="https://www.atahgroup.com/contact"
+          />
+        </nav>
 
-          {/* Theme toggle */}
-          <div className="hidden lg:flex lg:items-center lg:ml-2">
+        {/* Theme toggle */}
+        <div className="hidden md:flex md:items-center md:ml-2">
+          <button
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            className="p-2 rounded-md hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground/30"
+          >
+            {theme === "dark" ? (
+              <FiSun className="h-5 w-5 text-foreground" />
+            ) : (
+              <FiMoon className="h-5 w-5 text-foreground" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile hamburger */}
+        <div className="md:hidden">
+          <button
+            aria-controls="mobile-menu"
+            aria-expanded={open}
+            aria-label="Toggle navigation menu"
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex items-center justify-center p-2 rounded-md text-foreground hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground/30"
+          >
+            <span className="sr-only">Open main menu</span>
+            {open ? (
+              <FiX className="h-6 w-6" aria-hidden />
+            ) : (
+              <FiMenu className="h-6 w-6" aria-hidden />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile menu panel */}
+      <div
+        id="mobile-menu"
+        className={`md:hidden transition-max-h duration-300 ease-in-out overflow-hidden bg-background/95 dark:bg-background/90 ${
+          open ? "max-h-screen" : "max-h-0"
+        }`}
+      >
+        <div className="flex flex-col items-center py-4 space-y-4">
+          {/* Mobile theme toggle */}
+          <div className="flex items-center justify-center w-full">
             <button
               onClick={toggleTheme}
               aria-label={`Switch to ${
                 theme === "dark" ? "light" : "dark"
               } mode`}
-              className="p-2 rounded-md hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground/30"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground/30"
             >
               {theme === "dark" ? (
                 <FiSun className="h-5 w-5 text-foreground" />
               ) : (
                 <FiMoon className="h-5 w-5 text-foreground" />
               )}
+              <span className="text-foreground/90 text-sm">
+                {theme === "dark" ? "Light" : "Dark"} mode
+              </span>
             </button>
           </div>
 
-          {/* Mobile hamburger */}
-          <div className="lg:hidden">
-            <button
-              aria-controls="mobile-menu"
-              aria-expanded={open}
-              aria-label="Toggle navigation menu"
-              onClick={() => setOpen((v) => !v)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-foreground hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground/30"
-            >
-              <span className="sr-only">Open main menu</span>
-              {open ? (
-                <FiX className="h-6 w-6" aria-hidden />
-              ) : (
-                <FiMenu className="h-6 w-6" aria-hidden />
-              )}
-            </button>
+          <div className="flex flex-col items-center w-full py-2 space-y-2">
+            <NavBarItem label="Home" href="/" onClick={close} />
+            <NavBarItem
+              label="Services"
+              href="https://www.atahgroup.com/services"
+              onClick={close}
+            />
+            <NavBarItem
+              label="Research"
+              href="https://www.atahgroup.com/research"
+              onClick={close}
+            />
+            <NavBarItem
+              label="About"
+              href="https://www.atahgroup.com/about"
+              onClick={close}
+            />
+            <NavBarItem
+              label="Contact Us"
+              href="https://www.atahgroup.com/contact"
+              onClick={close}
+            />
           </div>
         </div>
-
-        {/* Mobile menu panel */}
-        <div
-          id="mobile-menu"
-          className={`lg:hidden transition-max-h duration-300 ease-in-out overflow-hidden bg-background/95 dark:bg-background/90 ${
-            open ? "max-h-screen" : "max-h-0"
-          }`}
-        >
-          <div className="flex flex-col items-center py-4 space-y-4">
-            {/* Mobile theme toggle */}
-            <div className="flex items-center justify-center w-full">
-              <button
-                onClick={toggleTheme}
-                aria-label={`Switch to ${
-                  theme === "dark" ? "light" : "dark"
-                } mode`}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground/30"
-              >
-                {theme === "dark" ? (
-                  <FiSun className="h-5 w-5 text-foreground" />
-                ) : (
-                  <FiMoon className="h-5 w-5 text-foreground" />
-                )}
-                <span className="text-foreground/90 text-sm">
-                  {theme === "dark" ? "Light" : "Dark"} mode
-                </span>
-              </button>
-            </div>
-
-            <div className="flex flex-col items-center w-full py-2 space-y-2">
-              <NavBarItem label="Home" href="/" onClick={close} />
-              <NavBarItem label="Services" href="/services" onClick={close} />
-              <NavBarItem label="Research" href="/research" onClick={close} />
-              <NavBarItem label="About" href="/about" onClick={close} />
-              <NavBarItem label="Contact Us" href="/contact" onClick={close} />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="mt-2 mr-2">
-        <LoginButton />
       </div>
     </header>
   );
