@@ -271,17 +271,17 @@ const GrantUserAction = ({
   );
 };
 
-interface DepriveUserButtonProps {
+interface RevokeUserButtonProps {
   user: ListedUser;
   refreshCapabilities: () => void;
   capabilities: string[];
 }
 
-const DepriveUserActionInner = ({
+const RevokeUserActionInner = ({
   user,
   refreshCapabilities,
   capabilities,
-}: DepriveUserButtonProps) => {
+}: RevokeUserButtonProps) => {
   const deprivableCapabilities: string[] =
     (typeof window !== "undefined" &&
       JSON.parse(localStorage.getItem("session_capabilities") || "[]")) ||
@@ -306,7 +306,7 @@ const DepriveUserActionInner = ({
 
   const onConfirmRevoke = async () => {
     if (selectedCaps.length === 0) {
-      toast.error("Please select at least one capability to deprive.");
+      toast.error("Please select at least one capability to revoke.");
       return;
     }
     setIsProcessing(true);
@@ -334,15 +334,15 @@ const DepriveUserActionInner = ({
           refreshCapabilities();
         }}
       >
-        Deprive
+        Revoke
       </button>
 
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
           <div className="bg-background border border-foreground/40 rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-lg font-semibold">Deprive capabilities</h2>
+            <h2 className="text-lg font-semibold">Revoke capabilities</h2>
             <p className="mt-2 text-sm text-foreground">
-              Deprive capabilities from <strong>{user.email}</strong>
+              Revoke capabilities from <strong>{user.email}</strong>
             </p>
 
             <div className="mt-4 max-h-60 overflow-y-auto rounded p-2 bg-white dark:bg-background">
@@ -388,7 +388,7 @@ const DepriveUserActionInner = ({
                 onClick={onConfirmRevoke}
                 disabled={isProcessing}
               >
-                {isProcessing ? "Revoking..." : "Confirm Deprive"}
+                {isProcessing ? "Revoking..." : "Confirm Revoke"}
               </button>
             </div>
           </div>
@@ -398,24 +398,24 @@ const DepriveUserActionInner = ({
   );
 };
 
-const DepriveUserAction = ({
+const RevokeUserAction = ({
   user,
   refreshCapabilities,
   capabilities,
-}: DepriveUserButtonProps) => {
+}: RevokeUserButtonProps) => {
   if (!hasSessionCapability("AccountRevokeCapability")) {
     return (
       <button
         className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed"
         disabled
       >
-        Deprive
+        Revoke
       </button>
     );
   }
 
   return (
-    <DepriveUserActionInner
+    <RevokeUserActionInner
       user={user}
       refreshCapabilities={refreshCapabilities}
       capabilities={capabilities}
@@ -459,7 +459,7 @@ const AccountTableRow = ({ user, refetch_users }: AccountTableRowProps) => {
           capabilities={existingData?.accountGetUserCapabilities || []}
           refreshCapabilities={refreshCapabilities}
         />
-        <DepriveUserAction
+        <RevokeUserAction
           user={user}
           capabilities={existingData?.accountGetUserCapabilities || []}
           refreshCapabilities={refreshCapabilities}
