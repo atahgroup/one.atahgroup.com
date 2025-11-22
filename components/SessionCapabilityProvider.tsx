@@ -10,6 +10,17 @@ type SessionInfoQueryResult = {
   };
 };
 
+export function hasSessionCapability(capability: string) {
+  const capabilities = localStorage.getItem("session_capabilities");
+  if (!capabilities) return false;
+  try {
+    const capsArray = JSON.parse(capabilities);
+    return capsArray.includes(capability);
+  } catch {
+    return false;
+  }
+}
+
 export const SessionCapabilityProvider = ({
   children,
 }: {
