@@ -478,7 +478,7 @@ interface AccountTableProps {
   refetch_users: () => void;
 }
 
-const AccountTable = ({ users, refetch_users }: AccountTableProps) => {
+const AccountTableInner = ({ users, refetch_users }: AccountTableProps) => {
   return (
     <div className="mt-6 overflow-x-auto overflow-y-auto max-h-96">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -517,8 +517,22 @@ const AccountTable = ({ users, refetch_users }: AccountTableProps) => {
   );
 };
 
+const AccountTable = ({ users, refetch_users }: AccountTableProps) => {
+  if (!hasSessionCapability("AccountListUsers")) {
+    return (
+      <div className="mt-6">
+        <p className="text-sm text-foreground">
+          Your session does not have the capability to view user accounts.
+        </p>
+      </div>
+    );
+  }
+
+  return <AccountTableInner users={users} refetch_users={refetch_users} />;
+};
+
 interface CreateUserAccountProps {
-  refetch_users: () => void;
+  refetch_users: undefined | (() => void);
 }
 
 type CreateUserAccountResult = {
@@ -528,7 +542,7 @@ type CreateUserAccountResult = {
   };
 };
 
-const CreateUserAccount = ({ refetch_users }: CreateUserAccountProps) => {
+const CreateUserAccountInner = ({ refetch_users }: CreateUserAccountProps) => {
   const CREATE_USER = gql`
     mutation CreateUser($email: String!) {
       accountCreateUser(email: $email) {
@@ -560,7 +574,7 @@ const CreateUserAccount = ({ refetch_users }: CreateUserAccountProps) => {
       if (created) {
         toast.success(`Created user ${created.email} (ID ${created.userId})`);
         setEmail("");
-        await refetch_users();
+        await refetch_users?.();
       } else {
         toast.error("Create user failed: no data returned");
       }
@@ -572,37 +586,38 @@ const CreateUserAccount = ({ refetch_users }: CreateUserAccountProps) => {
     }
   };
 
-  if (!hasSessionCapability("AccountCreateUser")) {
-    return (
-      <div className="mt-4">
+  return (
+    <div className="mt-4 flex flex-col gap-2">
+      <p className="mt-6 text-sm text-foreground">
+        Create a new user account by entering their email address below.
+      </p>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="email"
+          placeholder="user@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="px-3 py-2 border rounded-md bg-white dark:bg-background text-foreground"
+        />
         <button
-          className="inline-flex whitespace-nowrap text-sm items-center px-3 py-1.5 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-gray-400 cursor-not-allowed"
-          disabled
+          className="inline-flex whitespace-nowrap text-sm items-center px-4 py-3 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          onClick={onCreate}
+          disabled={isCreating}
         >
-          Create User
+          {isCreating ? "Creating..." : "Create User"}
         </button>
       </div>
-    );
-  }
-
-  return (
-    <div className="mt-4 flex flex-wrap items-center gap-2">
-      <input
-        type="email"
-        placeholder="user@example.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="px-3 py-2 border rounded-md bg-white dark:bg-background text-foreground"
-      />
-      <button
-        className="inline-flex whitespace-nowrap text-sm items-center px-4 py-3 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-        onClick={onCreate}
-        disabled={isCreating}
-      >
-        {isCreating ? "Creating..." : "Create User"}
-      </button>
     </div>
   );
+};
+
+const CreateUserAccount = ({ refetch_users }: CreateUserAccountProps) => {
+  if (!hasSessionCapability("AccountCreateUser")) {
+    return <></>;
+  }
+
+  return <CreateUserAccountInner refetch_users={refetch_users} />;
 };
 
 export const UserAccountManagementPanelInner = () => {
@@ -626,27 +641,32 @@ export const UserAccountManagementPanelInner = () => {
   return (
     <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
       <h1 className="text-2xl font-semibold">User Accounts</h1>
-      <p className="mt-2 text-sm text-foreground">
-        A list of all registered user accounts.
-      </p>
       <AccountTable users={sortedUsers} refetch_users={refetch} />
-
-      <p className="mt-6 text-sm text-foreground">
-        Create a new user account by entering their email address below.
-      </p>
       <CreateUserAccount refetch_users={refetch} />
     </div>
   );
 };
 
 export const UserAccountManagementPanel = () => {
-  if (!hasSessionCapability("AccountListUsers")) {
+  if (
+    !hasSessionCapability("AccountListUsers") &&
+    !hasSessionCapability("AccountCreateUser")
+  ) {
     return (
       <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
         <h1 className="text-2xl font-semibold">Account Management</h1>
         <p className="mt-2 text-sm text-foreground">
-          Your session does not have the capability to view user accounts.
+          Your session does not have the capability to manage user accounts.
         </p>
+      </div>
+    );
+  }
+
+  if (!hasSessionCapability("AccountListUsers")) {
+    return (
+      <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
+        <h1 className="text-2xl font-semibold">User Accounts</h1>
+        <CreateUserAccount refetch_users={undefined} />
       </div>
     );
   }
