@@ -96,7 +96,7 @@ export const NavBar = () => {
           <NavBarItem label="Finance" href="/finance" />
           <NavBarItem label="Health" href="/health" />
           <NavBarItem label="Education" href="/education" />
-          <NavBarItem label="Citizen" href="/citizen" />
+          <NavBarItem label="Account" href="/account" />
         </nav>
 
         {/* Theme toggle */}
@@ -166,7 +166,7 @@ export const NavBar = () => {
             <NavBarItem label="Finance" href="/finance" onClick={close} />
             <NavBarItem label="Health" href="/health" onClick={close} />
             <NavBarItem label="Education" href="/education" onClick={close} />
-            <NavBarItem label="Citizen" href="/citizen" onClick={close} />
+            <NavBarItem label="Account" href="/account" onClick={close} />
           </div>
         </div>
       </div>
