@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiMenu, FiX, FiSun, FiMoon } from "react-icons/fi";
 
@@ -10,12 +11,15 @@ const NavBarItem = (props: {
   href: string;
   onClick?: () => void;
 }) => {
+  const currentPath = usePathname();
+  const isSelected = currentPath === props.href;
+
+  const linkClassName = `w-full text-center py-2 px-6 cursor-pointer text-foreground transition duration-200 hover:underline hover:underline-offset-6 whitespace-nowrap${
+    isSelected ? " underline underline-offset-6" : ""
+  }`;
+
   return (
-    <Link
-      href={props.href}
-      className="w-full text-center py-2 px-6 cursor-pointer text-foreground transition duration-200 hover:underline hover:underline-offset-4 whitespace-nowrap"
-      onClick={props.onClick}
-    >
+    <Link href={props.href} className={linkClassName} onClick={props.onClick}>
       {props.label}
     </Link>
   );
@@ -69,34 +73,34 @@ export const NavBar = () => {
   return (
     <header className="w-full border-b border-foreground/30 bg-background">
       <div className="w-full mx-auto flex px-4 py-2">
-        <div className="w-full flex items-center select-none space-x-2 mr-8">
-          <Image
-            src="/assets/logo.png"
-            alt="Atah Group Logo"
-            width={40}
-            height={40}
-          />
-          <span className="font-bold text-2xl text-foreground whitespace-nowrap">
-            Atah
-          </span>
+        <div className="flex w-full">
+          <div
+            className="flex items-center select-none space-x-2 pr-3 cursor-pointer"
+            onClick={() => (window.location.href = "/")}
+          >
+            <Image
+              src="/assets/logo.png"
+              alt="Atah Group Logo"
+              width={40}
+              height={40}
+            />
+            <span className="font-bold text-2xl text-foreground whitespace-nowrap">
+              Atah
+            </span>
+          </div>
         </div>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex md:items-center md:space-x-3">
-          <NavBarItem label="Home" href="/" />
-          <NavBarItem
-            label="Services"
-            href="https://www.atahgroup.com/services"
-          />
-          <NavBarItem label="About" href="https://www.atahgroup.com/about" />
-          <NavBarItem
-            label="Contact Us"
-            href="https://www.atahgroup.com/contact"
-          />
+        <nav className="hidden lg:flex lg:items-center lg:space-x-3">
+          <NavBarItem label="Security" href="/security" />
+          <NavBarItem label="Finance" href="/finance" />
+          <NavBarItem label="Health" href="/health" />
+          <NavBarItem label="Education" href="/education" />
+          <NavBarItem label="Citizen" href="/citizen" />
         </nav>
 
         {/* Theme toggle */}
-        <div className="hidden md:flex md:items-center md:ml-2">
+        <div className="hidden lg:flex lg:items-center lg:ml-2">
           <button
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
@@ -111,7 +115,7 @@ export const NavBar = () => {
         </div>
 
         {/* Mobile hamburger */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <button
             aria-controls="mobile-menu"
             aria-expanded={open}
@@ -132,7 +136,7 @@ export const NavBar = () => {
       {/* Mobile menu panel */}
       <div
         id="mobile-menu"
-        className={`md:hidden transition-max-h duration-300 ease-in-out overflow-hidden bg-background/95 dark:bg-background/90 ${
+        className={`lg:hidden transition-max-h duration-300 ease-in-out overflow-hidden bg-background/95 dark:bg-background/90 ${
           open ? "max-h-screen" : "max-h-0"
         }`}
       >
@@ -158,27 +162,11 @@ export const NavBar = () => {
           </div>
 
           <div className="flex flex-col items-center w-full py-2 space-y-2">
-            <NavBarItem label="Home" href="/" onClick={close} />
-            <NavBarItem
-              label="Services"
-              href="https://www.atahgroup.com/services"
-              onClick={close}
-            />
-            <NavBarItem
-              label="Research"
-              href="https://www.atahgroup.com/research"
-              onClick={close}
-            />
-            <NavBarItem
-              label="About"
-              href="https://www.atahgroup.com/about"
-              onClick={close}
-            />
-            <NavBarItem
-              label="Contact Us"
-              href="https://www.atahgroup.com/contact"
-              onClick={close}
-            />
+            <NavBarItem label="Security" href="/security" onClick={close} />
+            <NavBarItem label="Finance" href="/finance" onClick={close} />
+            <NavBarItem label="Health" href="/health" onClick={close} />
+            <NavBarItem label="Education" href="/education" onClick={close} />
+            <NavBarItem label="Citizen" href="/citizen" onClick={close} />
           </div>
         </div>
       </div>
