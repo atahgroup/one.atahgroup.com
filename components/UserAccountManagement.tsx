@@ -586,7 +586,7 @@ const CreateUserAccount = ({ refetch_users }: CreateUserAccountProps) => {
   }
 
   return (
-    <div className="mt-4 flex items-center gap-2">
+    <div className="mt-4 flex flex-wrap items-center gap-2">
       <input
         type="email"
         placeholder="user@example.com"
