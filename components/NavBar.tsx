@@ -74,9 +74,9 @@ export const NavBar = () => {
     <header className="w-full border-b border-foreground/30 bg-background">
       <div className="w-full mx-auto flex px-4 py-2">
         <div className="flex w-full">
-          <div
-            className="flex items-center select-none space-x-2 pr-3 cursor-pointer"
-            onClick={() => (window.location.href = "/")}
+          <Link
+            className="flex items-center select-none space-x-2 pr-3"
+            href="/"
           >
             <Image
               src="/assets/logo.png"
@@ -87,7 +87,7 @@ export const NavBar = () => {
             <span className="font-bold text-2xl text-foreground whitespace-nowrap">
               Atah
             </span>
-          </div>
+          </Link>
         </div>
 
         {/* Desktop nav */}
