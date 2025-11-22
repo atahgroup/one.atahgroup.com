@@ -70,7 +70,7 @@ const UsersTable = ({
   );
 };
 
-export const UserAccountManagementTable = () => {
+export const UserAccountManagementTableInner = () => {
   const LIST_ALL_USERS = gql`
     query {
       accountListAllUsers {
@@ -122,7 +122,7 @@ export const UserAccountManagementTable = () => {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto w-full border border-foreground/40 p-6 rounded-lg">
+      <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
         <h1 className="text-2xl font-semibold">User Accounts</h1>
         <p className="mt-2 text-sm text-gray-600">
           A list of all registered user accounts.
@@ -163,4 +163,30 @@ export const UserAccountManagementTable = () => {
       )}
     </>
   );
+};
+
+function isAuthorizedToSeeUsers() {
+  const capabilities = localStorage.getItem("session_capabilities");
+  if (!capabilities) return false;
+  try {
+    const capsArray = JSON.parse(capabilities);
+    return capsArray.includes("AccountListUsers");
+  } catch {
+    return false;
+  }
+}
+
+export const UserAccountManagementTable = () => {
+  if (!isAuthorizedToSeeUsers()) {
+    return (
+      <div className="flex flex-col w-full border border-foreground/40 p-6 rounded-lg">
+        <h1 className="text-2xl font-semibold">Account Management</h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Your session does not have the capability to view user accounts.
+        </p>
+      </div>
+    );
+  }
+
+  return <UserAccountManagementTableInner />;
 };
