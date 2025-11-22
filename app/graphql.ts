@@ -17,60 +17,65 @@ export type Scalars = {
 export type CurrentSessionInfo = {
   __typename: 'CurrentSessionInfo';
   capabilities: Array<Scalars['String']['output']>;
-  user_id: Scalars['Int']['output'];
+  userId: Scalars['Int']['output'];
 };
 
 export type ListedUser = {
   __typename: 'ListedUser';
   email: Scalars['String']['output'];
-  user_id: Scalars['Int']['output'];
+  userId: Scalars['Int']['output'];
 };
 
 export type Mutation = {
   __typename: 'Mutation';
-  account_create_user: NewUserAccount;
-  account_delete_user: Scalars['Boolean']['output'];
-  account_grant_capability: Scalars['Boolean']['output'];
-  account_revoke_capability: Scalars['Boolean']['output'];
+  accountCreateUser: NewUserAccount;
+  accountDeleteUser: Scalars['Boolean']['output'];
+  accountGrantCapability: Scalars['Boolean']['output'];
+  accountRevokeCapability: Scalars['Boolean']['output'];
 };
 
 
-export type MutationAccount_Create_UserArgs = {
+export type MutationAccountCreateUserArgs = {
   email: Scalars['String']['input'];
 };
 
 
-export type MutationAccount_Delete_UserArgs = {
-  user_id: Scalars['Int']['input'];
+export type MutationAccountDeleteUserArgs = {
+  userId: Scalars['Int']['input'];
 };
 
 
-export type MutationAccount_Grant_CapabilityArgs = {
+export type MutationAccountGrantCapabilityArgs = {
   capabilities: Array<Scalars['String']['input']>;
-  user_id: Scalars['Int']['input'];
+  userId: Scalars['Int']['input'];
 };
 
 
-export type MutationAccount_Revoke_CapabilityArgs = {
+export type MutationAccountRevokeCapabilityArgs = {
   capabilities: Array<Scalars['String']['input']>;
-  user_id: Scalars['Int']['input'];
+  userId: Scalars['Int']['input'];
 };
 
 export type NewUserAccount = {
   __typename: 'NewUserAccount';
   capabilities: Array<Scalars['String']['output']>;
   email: Scalars['String']['output'];
-  user_id: Scalars['Int']['output'];
+  userId: Scalars['Int']['output'];
 };
 
 export type Query = {
   __typename: 'Query';
-  account_get_user_capabilities: Array<Scalars['String']['output']>;
-  account_list_all_users: Array<ListedUser>;
-  account_session_info: CurrentSessionInfo;
+  accountGetUserCapabilities: Array<Scalars['String']['output']>;
+  accountListAllUsers: Array<ListedUser>;
+  accountSessionInfo: CurrentSessionInfo;
 };
 
 
-export type QueryAccount_Get_User_CapabilitiesArgs = {
-  user_id: Scalars['Int']['input'];
+export type QueryAccountGetUserCapabilitiesArgs = {
+  userId: Scalars['Int']['input'];
 };
+
+export type Unnamed_1_QueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type Unnamed_1_Query = { accountSessionInfo: { __typename: 'CurrentSessionInfo', capabilities: Array<string> } };

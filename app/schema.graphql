@@ -1,25 +1,25 @@
 type ListedUser {
-  user_id: Int!
+  userId: Int!
   email: String!
 }
 
 type NewUserAccount {
-  user_id: Int!
+  userId: Int!
   email: String!
   capabilities: [String!]!
 }
 
 type CurrentSessionInfo {
-  user_id: Int!
+  userId: Int!
   capabilities: [String!]!
 }
 
 type Query {
   # USER ACCOUNT MANAGEMENT
   ####################################################################
-  account_list_all_users: [ListedUser!]!
-  account_get_user_capabilities(user_id: Int!): [String!]!
-  account_session_info: CurrentSessionInfo!
+  accountListAllUsers: [ListedUser!]!
+  accountGetUserCapabilities(userId: Int!): [String!]!
+  accountSessionInfo: CurrentSessionInfo!
 
   # SERVICE MANAGEMENT
   ####################################################################
@@ -28,10 +28,10 @@ type Query {
 type Mutation {
   # USER ACCOUNT MANAGEMENT
   ####################################################################
-  account_grant_capability(user_id: Int!, capabilities: [String!]!): Boolean!
-  account_revoke_capability(user_id: Int!, capabilities: [String!]!): Boolean!
-  account_create_user(email: String!): NewUserAccount!
-  account_delete_user(user_id: Int!): Boolean!
+  accountGrantCapability(userId: Int!, capabilities: [String!]!): Boolean!
+  accountRevokeCapability(userId: Int!, capabilities: [String!]!): Boolean!
+  accountCreateUser(email: String!): NewUserAccount!
+  accountDeleteUser(userId: Int!): Boolean!
 
   # SERVICE MANAGEMENT
   ####################################################################
