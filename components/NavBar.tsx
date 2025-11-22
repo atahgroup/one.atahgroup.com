@@ -1,5 +1,7 @@
 "use client";
 
+import { gql } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -26,6 +28,13 @@ const NavBarItem = (props: {
 };
 
 export const NavBar = () => {
+  const END_SESSION = gql`
+    mutation EndSession {
+      endSession
+    }
+  `;
+
+  const [endSession] = useMutation(END_SESSION);
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     try {
@@ -97,6 +106,11 @@ export const NavBar = () => {
           <NavBarItem label="Health" href="/health" />
           <NavBarItem label="Education" href="/education" />
           <NavBarItem label="Account" href="/account" />
+          <NavBarItem
+            label="Logout"
+            onClick={() => endSession()}
+            href="https://www.atahgroup.com/"
+          />
         </nav>
 
         {/* Theme toggle */}
