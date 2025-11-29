@@ -14,6 +14,25 @@ type CurrentSessionInfo {
   capabilities: [String!]!
 }
 
+type MyNoteEntry {
+  noteId: Int!
+  userId: Int!
+  title: String!
+  tags: [String!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MyNote {
+  noteId: Int!
+  userId: Int!
+  title: String!
+  tags: [String!]!
+  content: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
 type Query {
   # USER ACCOUNT MANAGEMENT
   ####################################################################
@@ -22,8 +41,10 @@ type Query {
   accountSessionInfo: CurrentSessionInfo!
   listAllCapabilities: [String!]!
 
-  # SERVICE MANAGEMENT
+  # MY NOTES
   ####################################################################
+  mynoteList: [MyNoteEntry!]!
+  mynoteRead(noteId: Int!): MyNote!
 }
 
 type Mutation {
@@ -35,8 +56,16 @@ type Mutation {
   accountDeleteUser(userId: Int!): Boolean!
   endSession: Boolean!
 
-  # SERVICE MANAGEMENT
+  # MY NOTES
   ####################################################################
+  mynoteCreate(title: String!, tags: [String!]!, content: String!): MyNoteEntry!
+  mynoteDelete(noteId: Int!): Boolean!
+  mynoteEdit(
+    noteId: Int!
+    newTitle: String
+    newTags: [String!]
+    newContent: String
+  ): Boolean!
 }
 
 schema {
