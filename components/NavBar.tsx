@@ -129,7 +129,7 @@ export const NavBar = () => {
       {/* Mobile menu panel */}
       <div
         id="mobile-menu"
-        className={`lg:hidden transition-max-h duration-300 ease-in-out overflow-hidden bg-background/95 dark:bg-background/90 ${
+        className={`lg:hidden overflow-hidden bg-background/95 dark:bg-background/90 ${
           open ? "max-h-screen" : "max-h-0"
         }`}
       >
