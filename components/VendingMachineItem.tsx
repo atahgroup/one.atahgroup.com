@@ -8,25 +8,25 @@ const StatusBadge = (props: { status: string | undefined }) => {
     case "operational":
       return (
         <span className="px-2 py-1 bg-green-200 text-green-800 rounded-full text-xs">
-          Operational
+          ℹ️ Operational
         </span>
       );
     case "out_of_service":
       return (
         <span className="px-2 py-1 bg-red-200 text-red-800 rounded-full text-xs">
-          Out of Service
+          ℹ️ Out of Service
         </span>
       );
     case "maintenance_required":
       return (
         <span className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-xs">
-          Maintenance Required
+          ℹ️ Maintenance Required
         </span>
       );
     default:
       return (
         <span className="px-2 py-1 bg-gray-200 text-gray-800 rounded-full text-xs">
-          Unknown
+          ℹ️ Unknown
         </span>
       );
   }
@@ -73,6 +73,11 @@ const LastMaintenanceDate = (props: { date: Date | undefined }) => {
   );
 };
 
+function handleClick(id: string) {
+  // Implement the click handler logic here
+  console.log("Vending machine ID:", id);
+}
+
 export const VendingMachineItem = (props: VendingMachine) => {
   return (
     <div className="flex flex-col rounded-xl p-2 border border-foreground/20">
@@ -93,9 +98,8 @@ export const VendingMachineItem = (props: VendingMachine) => {
             <StatusBadge status={props.status} />
           </div>
         </div>
-
         <div className="flex flex-col flex-1 gap-2 sm:items-end sm:justify-between">
-          <a className="font-semibold text-md text-foreground">
+          <a className="font-semibold text-md text-foreground break-all">
             {formatAddress(props.address)}
           </a>
           <a className="text-foreground text-sm">
@@ -103,8 +107,13 @@ export const VendingMachineItem = (props: VendingMachine) => {
           </a>
           <p className="text-foreground text-sm">📝 {props.spot_description}</p>
         </div>
+        <button
+          className="bg-blue-500 text-white font-semibold text-lg px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-100"
+          onClick={() => handleClick(props.id)}
+        >
+          &gt;
+        </button>
       </div>
-      <div className="flex flex-row justify-between"></div>
     </div>
   );
 };
