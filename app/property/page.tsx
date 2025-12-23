@@ -1,4 +1,5 @@
 import { VendingMachineList } from "@/components/VendingMachineList";
+import WorldPropertyMap from "@/components/WorldPropertyMap";
 
 export default function Property() {
   return (
@@ -7,7 +8,7 @@ export default function Property() {
         <VendingMachineList />
       </div>
       <div className="col-span-2 w-full flex hidden xl:block bg-green-400">
-        {/* TODO: interactive 3d world map */}
+        <WorldPropertyMap />
       </div>
     </main>
   );
