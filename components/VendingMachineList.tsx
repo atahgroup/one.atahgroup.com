@@ -11,7 +11,7 @@ export const VendingMachineList = () => {
         <a>Count: {VENDING_MACHINE_LOCATIONS.length}</a>
       </div>
 
-      <ol className="w-full flex flex-col gap-2 overflow-y-auto max-h-screen p-2">
+      <ol className="w-full flex flex-col gap-2 p-2">
         {VENDING_MACHINE_LOCATIONS.length === 0 ? (
           <a className="p-2 text-sm text-foreground">
             No vending machines found.
