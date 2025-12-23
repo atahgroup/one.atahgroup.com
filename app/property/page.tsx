@@ -1,5 +1,4 @@
 import { VendingMachineList } from "@/components/VendingMachineList";
-import React from "react";
 
 export default function Property() {
   return (

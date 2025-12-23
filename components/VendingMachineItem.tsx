@@ -1,13 +1,7 @@
 "use client";
 
 import { formatAddress, VendingMachine } from "@/constants/location-data";
-import { gql } from "@apollo/client";
-import { useMutation } from "@apollo/client/react";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { FiMenu, FiX, FiSun, FiMoon } from "react-icons/fi";
 
 const StatusBadge = (props: { status: string | undefined }) => {
   switch (props.status) {
